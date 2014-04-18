@@ -4,8 +4,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/param.h>
 
-#define VERSION_STRING "1.0"
+#define VERSION_STRING "1.1"
 
 #define CURRENT_JDK_PATH "/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK"
 #define TARGET_DIR       "/Library/Java/JavaVirtualMachines"
@@ -95,9 +96,44 @@ int check_name(int length, char *name){
     return flag;
 }
 
+char *find_current_version(char *current){
+    char *buffer;
+    int flag;
+    int i;
+    char *version;
+
+    buffer = (char *)malloc(sizeof(char) * (MAXPATHLEN + 1));
+    if(buffer == NULL){
+        perror("memory");
+        return NULL;
+    }
+
+    flag = readlink(CURRENT_JDK_PATH, buffer, MAXPATHLEN + 1);
+    if(flag < 0){
+        perror(CURRENT_JDK_PATH);
+        return NULL;
+    }
+
+    version = strrchr(buffer, '/');
+    version++;
+    for(i = 0; version[i] != '\0'; i++){
+        current[i] = version[i];
+    }
+
+    return current;
+}
+
 int list_versions(){
     DIR *dir;
     struct dirent *dp;
+    char current[64];
+    int i;
+
+    for(i = 0; i < 64; i++){
+        current[i] = '\0';
+    }
+
+    find_current_version(current);
 
     if((dir = opendir(TARGET_DIR)) == NULL){
         perror(TARGET_DIR);
@@ -108,7 +144,7 @@ int list_versions(){
             continue;
         }
         if(check_name(dp->d_namlen, dp->d_name) == 1){
-            printf("%s\n", dp->d_name);
+            printf("%s %s\n", dp->d_name, (strcmp(dp->d_name, current) == 0)?"(*)":"");
         }
     }
     return 0;
@@ -125,7 +161,7 @@ void show_help(char *argv){
     printf("    -h, --help:    print this message.\n\n");
     printf("The program prints installed JDK versions on your environemnt\n");
     printf("with no command line arguments.\n");
-    printf("The program switches JDK version given command line argument.");
+    printf("The program switches JDK version given command line argument.\n");
 }
 
 int parse_option(int argc, char **argv){

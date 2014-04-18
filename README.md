@@ -20,18 +20,18 @@ hyphen, and underbar.  Therefore, use symbolic link.
     $ ls -F
     jdk1.7.0_45.jdk/    jdk1.8.0_20.jdk/
     $ chjdkver
-    $ ln -s jdk1.7.0_45.jdk ./1.7
-    $ ln -s jdk1.8.0_20.jdk ./1.8
+    $ sudo ln -s jdk1.7.0_45.jdk ./1.7
+    $ sudo ln -s jdk1.8.0_20.jdk ./1.8
     $ ls -F
     1.7@             1.8@             jdk1.7.0_45.jdk/ jdk1.8.0_20.jdk/
     $ chjdkver
-    1.7
+    1.7 (*)
     1.8
 
 Note that,
 `/System/Library/Frameworks/JavaVM.framework/Versions/A/Commands` must
 be linked to `../CurrentJDK/Contents/Home/bin`.  Because
-`/usr/bin/java` and etc. symblic linked to
+`/usr/bin/java` and etc. are symblic linked to
 `/System/Library/Frameworks/JavaVM.framework/Versions/A/Commands/java`,
 and the `A` directory is not symbolic link.
 
@@ -46,17 +46,20 @@ and the `A` directory is not symbolic link.
     Java(TM) SE Runtime Environment (build 1.7.0_45-b18)
     Java HotSpot(TM) 64-Bit Server VM (build 24.45-b08, mixed mode)
     $ chjdkver
-    1.7
+    1.7 (*)
     1.8
     $ sudo chjdkver 1.8
     $ java -version
     java version "1.8.0_20-ea"
     Java(TM) SE Runtime Environment (build 1.8.0_20-ea-b05)
     Java HotSpot(TM) 64-Bit Server VM (build 25.20-b05, mixed mode)
+    $ chjdkver
+    1.7
+    1.8 (*)
 
 ## Future work
 
-* show currently used jdk at listing installed jdk.
+* Do initial settings.
 
 ## Authors
 
