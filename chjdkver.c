@@ -150,12 +150,21 @@ int list_versions(){
     return 0;
 }
 
+char *nopath(char *path){
+    char *nopath;
+
+    nopath = strrchr(path, '/');
+    nopath++;
+
+    return nopath;
+}
+
 void show_version(char *argv){
-    printf("%s version %s\n", argv, VERSION_STRING);
+    printf("%s version %s\n", nopath(argv), VERSION_STRING);
 }
 
 void show_help(char *argv){
-    printf("Usage: %s [OPTIONS] [<version>]\n", argv);
+    printf("Usage: %s [OPTIONS] [<version>]\n", nopath(argv));
     printf("OPTIONS\n");
     printf("    -v, --version: print the version and exit.\n");
     printf("    -h, --help:    print this message.\n\n");
