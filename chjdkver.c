@@ -6,41 +6,25 @@
 #include <sys/stat.h>
 #include <sys/param.h>
 
-#define VERSION_STRING "1.1"
+#include "chjdkver.h"
 
-#define CURRENT_JDK_PATH "/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK"
-#define TARGET_DIR       "/Library/Java/JavaVirtualMachines"
-#define VERSION_PATTERN  "0123456789-_."
-
-#define LIST    0x001
-#define CHANGE  0x002
-#define HELP    0x004
-#define VERSION 0x008
-
-int check_exists(char *path){
-    char *buffer;
+int check_exists_dir(char *path){
     struct stat *statbuf;
     int flag;
 
-    buffer = (char *)malloc(sizeof(char) * (strlen(TARGET_DIR) + strlen(path) + 2));
-    sprintf(buffer, "%s/%s", TARGET_DIR, path);
-
     statbuf = (struct stat *)malloc(sizeof(struct stat));
 
-    flag = stat(buffer, statbuf);
+    flag = stat(path, statbuf);
     if(flag != 0){
         perror(path);
     }
-    if((statbuf->st_mode & S_IFMT) != S_IFDIR){
-        printf("%s: not directory\n", path);
+    if((statbuf->st_mode & S_IFDIR) != S_IFDIR){
         flag = 1;
     }
 
     free(statbuf);
-    free(buffer);
     return flag;
 }
-
 int unlink_old(){
     int flag = unlink(CURRENT_JDK_PATH);
     if(flag != 0){
@@ -50,34 +34,37 @@ int unlink_old(){
 }
 
 int link_new(char *path){
-    char *buffer;
     int flag;
 
-    buffer = (char *)malloc(sizeof(char) * (strlen(TARGET_DIR) + strlen(path) + 2));
-    sprintf(buffer, "%s/%s", TARGET_DIR, path);
-
-    flag = symlink(buffer, CURRENT_JDK_PATH);
+    flag = symlink(path, CURRENT_JDK_PATH);
     if(flag != 0){
-        perror(buffer);
+        perror(path);
     }
-    free(buffer);
 
     return flag;
 }
 
-int change_link(char *version){
+int change_link(char *path){
     int flag = unlink_old();
     if(flag == 0){
-        link_new(version);
+        link_new(path);
     }
     return flag;
 }
 
 int change_version(char *version){
-    int value = check_exists(version);
+    char *buffer;
+    int value;
+
+    buffer = (char *)malloc(sizeof(char) * (strlen(TARGET_DIR) + strlen(version) + 2));
+    sprintf(buffer, "%s/%s", TARGET_DIR, version);
+
+    value = check_exists_dir(buffer);
     if(value == 0){
-        value = change_link(version);
+        value = change_link(buffer);
     }
+    free(buffer);
+
     return value;
 }
 
@@ -150,81 +137,3 @@ int list_versions(){
     return 0;
 }
 
-char *nopath(char *path){
-    char *nopath;
-
-    nopath = strrchr(path, '/');
-    nopath++;
-
-    return nopath;
-}
-
-void show_version(char *argv){
-    printf("%s version %s\n", nopath(argv), VERSION_STRING);
-}
-
-void show_help(char *argv){
-    printf("Usage: %s [OPTIONS] [<version>]\n", nopath(argv));
-    printf("OPTIONS\n");
-    printf("    -v, --version: print the version and exit.\n");
-    printf("    -h, --help:    print this message.\n\n");
-    printf("The program prints installed JDK versions on your environemnt\n");
-    printf("with no command line arguments.\n");
-    printf("The program switches JDK version given command line argument.\n");
-}
-
-int parse_option(int argc, char **argv){
-    int i;
-    int type = 0;
-    for(i = 1; i < argc; i++){
-        if(*argv[i] == '-'){
-            if(strcmp(argv[i], "-v") == 0 ||
-               strcmp(argv[i], "--version") == 0){
-                type = type | VERSION;
-            }
-            if(strcmp(argv[i], "-h") == 0 ||
-               strcmp(argv[i], "--help") == 0){
-                type = type | HELP;
-            }
-        }
-        else{
-            type = type | CHANGE;
-        }
-    }
-    if(type == 0){
-        type = LIST;
-    }
-    return type;
-}
-
-int execute_option(int type, int argc, char **argv){
-    if((type & VERSION) == VERSION){
-        show_version(argv[0]);
-    }
-    if((type & HELP) == HELP){
-        show_help(argv[0]);
-    }
-    if((type & (HELP | VERSION)) != 0){
-        return 0;
-    }
-
-    if((type & LIST) == LIST){
-        return list_versions();
-    }
-    else if((type & CHANGE) == CHANGE){
-        int i;
-        for(i = 1; i < argc; i++){
-            if(*argv[i] != '-'){
-                return change_version(argv[i]);
-            }
-        }
-    }
-    printf("fatal error: unknown command");
-    return 1;
-}
-
-int main(int argc, char *argv[]){
-    int type = parse_option(argc, argv);
-
-    return execute_option(type, argc, argv);
-}

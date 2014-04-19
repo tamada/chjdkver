@@ -35,6 +35,10 @@ be linked to `../CurrentJDK/Contents/Home/bin`.  Because
 `/System/Library/Frameworks/JavaVM.framework/Versions/A/Commands/java`,
 and the `A` directory is not symbolic link.
 
+    $ sudo chjdkver --init_env
+
+Above command shows the following commands.
+
     $ cd /System/Library/Frameworks/JavaVM.framework/Versions/A
     $ sudo mv Commands Commands.back
     $ sudo ln -s ../CurrentJDK/Contents/Home/bin ./Commands
