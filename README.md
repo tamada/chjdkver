@@ -1,4 +1,4 @@
-# chjdkver
+# chjdkver 2.0
 
 ## What is this?
 
@@ -10,23 +10,67 @@ This program simply switches jdk versions.
 
 ## Usage
 
-### Preparation
+### Print Available JDKs
 
-Oracle JDKs are installed into `/Library/Java/JavaVirtualMachines`.
-This program shows only files whose name is contained numbers, dot(.),
-hyphen, and underbar.  Therefore, use symbolic link.
+This program shows available jdks with no command line arguments, and
+prints currently used jdk.  The printed jdks are the available jdks.
 
     $ cd /Library/Java/JavaVirtualMachines
     $ ls -F
-    jdk1.7.0_45.jdk/    jdk1.8.0_20.jdk/
+    1.7@               1.7.0_45@          1.8.0@             jdk1.7.0_45.jdk/   
+    1.7.0@             1.8@               1.8.0_20@          jdk1.8.0_20.jdk/
     $ chjdkver
-    $ sudo ln -s jdk1.7.0_45.jdk ./1.7
-    $ sudo ln -s jdk1.8.0_20.jdk ./1.8
-    $ ls -F
-    1.7@             1.8@             jdk1.7.0_45.jdk/ jdk1.8.0_20.jdk/
-    $ chjdkver
-    1.7 (*)
+    1.7      (*)
+    1.7.0
+    1.7.0_45
     1.8
+    1.8.0
+    1.8.0_20
+
+### Switch JDK
+
+This program changes jdk version to command line argument.  If
+unavailable version is specified, this program shows error message and
+quit.
+
+    $ java -version
+    java version "1.7.0_45"
+    Java(TM) SE Runtime Environment (build 1.7.0_45-b18)
+    Java HotSpot(TM) 64-Bit Server VM (build 24.45-b08, mixed mode)
+    $ chjdkver
+    1.7      (*)
+    1.7.0
+    1.7.0_10
+    1.7.0_45
+    1.8
+    1.8.0
+    1.8.0_20
+    $ sudo chjdkver 1.8
+    $ java -version
+    java version "1.8.0_20-ea"
+    Java(TM) SE Runtime Environment (build 1.8.0_20-ea-b05)
+    Java HotSpot(TM) 64-Bit Server VM (build 25.20-b05, mixed mode)
+    $ chjdkver
+    1.7
+    1.7.0
+    1.7.0_10
+    1.7.0_45
+    1.8      (*)
+    1.8.0
+    1.8.0_20
+
+### Preparation
+
+This program supports initialization of environment and available jdks.
+Initialization sequence runs with certain options, as follows.
+
+    $ sudo chjdkver --init
+
+Above command performs initialization sequence for environment and
+installed jdks.  When this initialization sequence is done, following
+two initialization sequence is performed.
+
+#### Preparation for environment
 
 Note that,
 `/System/Library/Frameworks/JavaVM.framework/Versions/A/Commands` must
@@ -43,27 +87,32 @@ Above command shows the following commands.
     $ sudo mv Commands Commands.back
     $ sudo ln -s ../CurrentJDK/Contents/Home/bin ./Commands
 
-### Switch JDK
+#### Preparation for installed JDKs
 
-    $ java -version
-    java version "1.7.0_45"
-    Java(TM) SE Runtime Environment (build 1.7.0_45-b18)
-    Java HotSpot(TM) 64-Bit Server VM (build 24.45-b08, mixed mode)
+Oracle JDKs are installed into `/Library/Java/JavaVirtualMachines`.
+This program shows only files whose name is contained numbers, dot(.),
+hyphen, and underbar.  Therefore, this initialization sequence
+symbolik link to certain name.
+
+    $ ls -F
+    jdk1.7.0_10.jdk/    jdk1.7.0_45.jdk/    jdk1.8.0_20.jdk/
     $ chjdkver
-    1.7 (*)
-    1.8
-    $ sudo chjdkver 1.8
-    $ java -version
-    java version "1.8.0_20-ea"
-    Java(TM) SE Runtime Environment (build 1.8.0_20-ea-b05)
-    Java HotSpot(TM) 64-Bit Server VM (build 25.20-b05, mixed mode)
+    $ sudo chjdkver --init_jdks
+    1.7@             1.7.0_10@        1.8@             1.8.0_20@        jdk1.7.0_45.jdk/
+    1.7.0@           1.7.0_45@        1.8.0@           jdk1.7.0_10.jdk/ jdk1.8.0_20.jdk/
     $ chjdkver
-    1.7
-    1.8 (*)
+    1.7      (*)
+    1.7.0    
+    1.7.0_10 
+    1.7.0_45 
+    1.8      
+    1.8.0    
+    1.8.0_20 
+
 
 ## Future work
 
-* Do initial settings.
+* ????
 
 ## Authors
 

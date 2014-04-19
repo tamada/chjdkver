@@ -20,7 +20,9 @@ void show_version(char *argv){
 void show_help(char *argv){
     printf("Usage: %s [OPTIONS] [<version>]\n", nopath(argv));
     printf("OPTIONS\n");
+    printf("    -i, --init:      perform init_env and init_jdks.\n");
     printf("    -e, --init_env:  prepare and check the environment.\n");
+    printf("    -j, --init_jdks: create symlinks for installed jdk.\n");
     printf("    -v, --version:   print the version and exit.\n");
     printf("    -h, --help:      print this message.\n\n");
     printf("The program prints installed JDK versions on your environemnt\n");
@@ -41,9 +43,17 @@ int parse_option(int argc, char **argv){
                strcmp(argv[i], "--help") == 0){
                 type = type | HELP;
             }
+            if(strcmp(argv[i], "-i") == 0 ||
+               strcmp(argv[i], "--init") == 0){
+                type = type | INIT_ENV | INIT_JDKS;
+            }
             if(strcmp(argv[i], "-e") == 0 ||
                strcmp(argv[i], "--init_env") == 0){
                 type = type | INIT_ENV;
+            }
+            if(strcmp(argv[i], "-j") == 0 ||
+               strcmp(argv[i], "--init_jdks") == 0){
+                type = type | INIT_JDKS;
             }
         }
         else{
@@ -81,6 +91,9 @@ int execute_option(int type, int argc, char **argv){
     else{
         if((type & INIT_ENV) == INIT_ENV){
             init_env();
+        }
+        if((type & INIT_JDKS) == INIT_JDKS){
+            init_jdks();
         }
     }
     return 1;

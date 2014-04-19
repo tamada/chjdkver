@@ -6,8 +6,11 @@
 #include <sys/stat.h>
 #include <sys/param.h>
 
-#include "chjdkver.h"
+#include <chjdkver.h>
 
+/**
+ * 
+ */
 int check_exists_dir(char *path){
     struct stat *statbuf;
     int flag;
@@ -15,16 +18,19 @@ int check_exists_dir(char *path){
     statbuf = (struct stat *)malloc(sizeof(struct stat));
 
     flag = stat(path, statbuf);
-    if(flag != 0){
-        perror(path);
+    if(flag == 0){
+        if((statbuf->st_mode & S_IFDIR) != S_IFDIR){
+            flag = 1;
+        }
     }
-    if((statbuf->st_mode & S_IFDIR) != S_IFDIR){
-        flag = 1;
+    else{
+        flag = -1;
     }
-
     free(statbuf);
+
     return flag;
 }
+
 int unlink_old(){
     int flag = unlink(CURRENT_JDK_PATH);
     if(flag != 0){
@@ -60,7 +66,13 @@ int change_version(char *version){
     sprintf(buffer, "%s/%s", TARGET_DIR, version);
 
     value = check_exists_dir(buffer);
-    if(value == 0){
+    if(value == -1){
+        printf("%s: unavailable version\n", version);
+    }
+    else if(value == 1){
+        printf("%s: initialization error\n", version);
+    }
+    else if(value == 0){
         value = change_link(buffer);
     }
     free(buffer);
@@ -131,7 +143,7 @@ int list_versions(){
             continue;
         }
         if(check_name(dp->d_namlen, dp->d_name) == 1){
-            printf("%s %s\n", dp->d_name, (strcmp(dp->d_name, current) == 0)?"(*)":"");
+            printf("%-8s %s\n", dp->d_name, (strcmp(dp->d_name, current) == 0)?"(*)":"");
         }
     }
     return 0;
