@@ -8,7 +8,12 @@ char *nopath(char *path){
     char *nopath;
 
     nopath = strrchr(path, '/');
-    nopath++;
+    if(nopath == NULL){
+        nopath = path;
+    }
+    else{
+        nopath++;
+    }
 
     return nopath;
 }
