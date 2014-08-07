@@ -15,6 +15,7 @@
 #define HELP       0x010
 #define VERSION    0x020
 
+extern int init_jdks();
 extern int init_env();
 extern int change_version(char *);
 extern int list_versions();
